@@ -1,10 +1,12 @@
 'use strict';
 
+
+
 const logoutButton = new LogoutButton();
 
 logoutButton.action = () => {
     ApiConnector.logout(response => {
-        if(response.sucsess) {
+        if(response.success) {
             location.reload();
         }
     });
@@ -12,7 +14,7 @@ logoutButton.action = () => {
 
 
 ApiConnector.current(response => {
-    if(response.sucsess) {
+    if(response.success) {
         ProfileWidget.showProfile(response.data);
     }
 });
@@ -21,7 +23,7 @@ const ratesBoard = new RatesBoard();
 
 function getRatesBoard() {
     ApiConnector.getStocks(response => {
-        if(response.sucsess) {
+        if(response.success) {
             ratesBoard.clearTable();
             ratesBoard.fillTable(response.data);
         }
@@ -43,7 +45,7 @@ moneyManager.addMoneyCallback = (data) => {
             ProfileWidget.showProfile(response.data);
             moneyManager.setMessage(response.success, 'Баланс пополнен');
         } else {
-            moneyManager.setMessage(response.error, 'Не удалось пополнить баланс');
+            moneyManager.setMessage(response.success, response.error);
         }
     });     
 }
@@ -54,7 +56,7 @@ moneyManager.conversionMoneyCallback = (data) => {
             ProfileWidget.showProfile(response.data);
             moneyManager.setMessage(response.success, 'Конвертация прошла успешно');
         } else {
-            moneyManager.setMessage(response.error, 'Не удалось конвертировать валюту');
+            moneyManager.setMessage(response.success, response.error);
         }
     });     
 }
@@ -65,15 +67,13 @@ moneyManager.sendMoneyCallback = (data) => {
             ProfileWidget.showProfile(response.data);
             moneyManager.setMessage(response.success, 'Перевод выполнен');
         } else {
-            moneyManager.setMessage(response.error, 'Не удалось произвести перевод');
+            moneyManager.setMessage(response.success, response.error);
         }
     });     
 }
 
 
 const favoritesWidget = new FavoritesWidget();
-
-let getFavorites = () => {
     ApiConnector.getFavorites(response => {
         if(response.success) {
             favoritesWidget.clearTable();
@@ -81,15 +81,18 @@ let getFavorites = () => {
             moneyManager.updateUsersList(response.data);
         }
     });
-}
+
+
 
 favoritesWidget.addUserCallback = (data) => {
     ApiConnector.addUserToFavorites(data, response => {
         if(response.success) {
-            getFavorites();
+            favoritesWidget.clearTable();
+            favoritesWidget.fillTable(response.data);
+            moneyManager.updateUsersList(response.data);
             favoritesWidget.setMessage(response.success, 'Пользователь добавлен в избранное');
         } else {
-            favoritesWidget.setMessage(response.error, 'Не удалось добавить пользователя в избранное');
+            favoritesWidget.setMessage(response.success, response.error);
         }
     });
 }
@@ -97,10 +100,12 @@ favoritesWidget.addUserCallback = (data) => {
 favoritesWidget.removeUserCallback = (data) => {
     ApiConnector.removeUserFromFavorites(data, response => {
         if(response.success) {
-            getFavorites();
+            favoritesWidget.clearTable();
+            favoritesWidget.fillTable(response.data);
+            moneyManager.updateUsersList(response.data);
             favoritesWidget.setMessage(response.success, 'Пользователь удален из избранного');
         } else {
-            favoritesWidget.setMessage(response.error, 'Не удалось удалить пользователя из избранного');
+            favoritesWidget.setMessage(response.success, response.error);
         }
     });
 }
